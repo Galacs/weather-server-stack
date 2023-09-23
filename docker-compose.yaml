@@ -1,0 +1,70 @@
+services:
+  grafana:
+    image: grafana/grafana-oss
+    restart: always
+    depends_on:
+      - mimir
+    ports:
+      - 3000:3000
+    environment:
+      - GF_FEATURE_TOGGLES_ENABLE=publicDashboards
+      - GF_AUTH_ANONYMOUS_ENABLED=true 
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - grafana-data:/var/lib/grafana
+  
+  prometheus:
+    image: prom/prometheus
+    restart: always
+    depends_on:
+      - mqtt_exporter
+    ports:
+      - 9090:9090
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--enable-feature=agent'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  mosquitto:
+    image: eclipse-mosquitto
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./mosquitto:/mosquitto/config
+      - ./certs:/mosquitto/certs
+    ports:
+      - 1883:1883
+      - 1884:1884
+      - 9001:9001
+
+  mqtt_exporter:
+    image: ghcr.io/hikhvar/mqtt2prometheus:latest
+    restart: always
+    depends_on:
+      - mosquitto
+    ports:
+      - 9641:9641
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config/mqtt_exporter.yaml:/config.yaml
+
+  mimir:
+    image: grafana/mimir
+    restart: always
+    ports:
+      - 9009:9009
+    command: ["-config.file=/etc/mimir.yaml"]
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config/alertmanager-fallback-config.yaml:/etc/alertmanager-fallback-config.yaml
+      - ./config/mimir.yaml:/etc/mimir.yaml
+      - ./storage/mimir:/data
+
+volumes:
+    grafana-data:
+    mimir-data:
+    minio-data:

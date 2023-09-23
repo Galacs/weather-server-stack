@@ -1,0 +1,101 @@
+mqtt:
+ # The MQTT broker to connect to
+ server: tcp://mosquitto:1884
+ # Optional: Username and Password for authenticating with the MQTT Server
+ user: user
+ password: password
+
+ topic_path: "#"
+ # Optional: Regular expression to extract the device ID from the topic path. The default regular expression, assumes
+ # that the last "element" of the topic_path is the device id.
+ # The regular expression must contain a named capture group with the name deviceid
+ # For example the expression for tasamota based sensors is "tele/(?P<deviceid>.*)/.*"
+ device_id_regex: "(.*/)?(?P<deviceid>.*)"
+ # The MQTT QoS level
+ qos: 0
+cache:
+ # Timeout. Each received metric will be presented for this time if no update is send via MQTT.
+ # Set the timeout to -1 to disable the deletion of metrics from the cache. The exporter presents the ingest timestamp
+ # to prometheus.
+ timeout: 24h 
+
+metrics:
+  - prom_name: temperature
+    mqtt_name: temperature_dht22
+    const_labels:
+      sensor_type: dht22
+    type: gauge
+
+  - prom_name: temperature
+    mqtt_name: temperature_dht11
+    const_labels:
+      sensor_type: dht11
+    type: gauge
+
+  - prom_name: temperature
+    mqtt_name: temperature_bmp180
+    const_labels:
+      sensor_type: bmp180
+    type: gauge
+
+  - prom_name: humidity
+    mqtt_name: humidity_dht11
+    const_labels:
+      sensor_type: dht11
+    type: gauge
+
+  - prom_name: humidity
+    mqtt_name: humidity_dht22
+    const_labels:
+      sensor_type: dht22
+    type: gauge
+
+
+  - prom_name: pressure
+    mqtt_name: pressure_bmp180
+    const_labels:
+      sensor_type: bmp180
+    type: gauge
+
+  - prom_name: sealevel_pressure
+    mqtt_name: sealevel_pressure_bmp180
+    const_labels:
+      sensor_type: bmp180
+    type: gauge
+
+  - prom_name: co2
+    mqtt_name: co2_sgp30
+    const_labels:
+      sensor_type: sgp30
+    type: gauge
+
+
+  - prom_name: tvoc
+    mqtt_name: tvoc_sgp30
+    const_labels:
+      sensor_type: sgp30
+    type: gauge
+
+  - prom_name: h2 
+    mqtt_name: h2_sgp30
+    const_labels:
+      sensor_type: sgp30
+    type: gauge
+
+  - prom_name: ethanol
+    mqtt_name: ethanol_sgp30
+    const_labels:
+      sensor_type: sgp30
+    type: gauge
+
+  - prom_name: rain
+    mqtt_name: rain_rainsensor
+    const_labels:
+      sensor_type: rainsensor
+    type: gauge
+
+  - prom_name: wifi
+    mqtt_name: wifi_esp32
+    const_labels:
+      sensor_type: esp32
+    type: gauge
